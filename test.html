@@ -1,0 +1,351 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Mind Heal AI Test</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7f5;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 15px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            resize: vertical;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            border: 0;
+            border-radius: 7px;
+            background: #1b4332;
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #result {
+            margin-top: 30px;
+        }
+
+        .message {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+
+        .question {
+            background: #e9f5ee;
+        }
+
+        .answer {
+            background: #f3f3f3;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .error {
+            background: #ffe5e5;
+            color: #a00000;
+        }
+
+        .products {
+            margin-top: 15px;
+            padding: 15px;
+            background: #fff9e6;
+            border-radius: 8px;
+        }
+
+        .product {
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .product:last-child {
+            border-bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Mind Heal AI Test</h1>
+
+    <textarea
+        id="question"
+        placeholder="Apna question likhiye..."
+    >mera koi apna dunia se chala gya hai to kya karoon</textarea>
+
+    <button
+        id="askButton"
+        onclick="askMindHeal()"
+    >
+        Ask Mind Heal
+    </button>
+
+    <div id="result"></div>
+
+</div>
+
+
+<script>
+
+    async function askMindHeal() {
+
+        const questionBox =
+            document.getElementById("question");
+
+        const resultBox =
+            document.getElementById("result");
+
+        const button =
+            document.getElementById("askButton");
+
+
+        const question =
+            questionBox.value.trim();
+
+
+        if (!question) {
+
+            alert("Please enter a question");
+
+            return;
+        }
+
+
+        // Show user question
+
+        resultBox.innerHTML += `
+            <div class="message question">
+                <strong>You:</strong><br>
+                ${escapeHtml(question)}
+            </div>
+        `;
+
+
+        button.disabled = true;
+        button.innerText = "Searching...";
+
+
+        try {
+
+            const response = await fetch(
+                "http://localhost:3000/api/mind-heal/chat",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        question: question
+                    })
+                }
+            );
+
+
+            const data =
+                await response.json();
+
+
+            console.log("API RESPONSE:", data);
+
+
+            if (!response.ok || !data.success) {
+
+                throw new Error(
+                    data.message || "API request failed"
+                );
+            }
+
+
+            // =====================================
+            // AI ANSWER
+            // =====================================
+
+            resultBox.innerHTML += `
+                <div class="message answer">
+                    <strong>Mind Heal AI:</strong><br><br>
+                    ${escapeHtml(data.answer || "")}
+                </div>
+            `;
+
+
+            // =====================================
+            // PRODUCTS
+            // =====================================
+
+            if (
+                data.products &&
+                data.products.length
+            ) {
+
+                let productsHtml = `
+                    <div class="products">
+
+                        <strong>
+                            Retrieved Products
+                        </strong>
+                `;
+
+
+                data.products.forEach(
+                    (product, index) => {
+
+                        productsHtml += `
+                            <div class="product">
+
+                                <strong>
+                                    ${index + 1}.
+                                    ${escapeHtml(product.name || "")}
+                                </strong>
+
+                                <br>
+
+                                Mind Heal No:
+                                ${escapeHtml(
+                                    String(product.mind_heal_no || "")
+                                )}
+
+                                <br>
+
+                                MySQL ID:
+                                ${escapeHtml(
+                                    String(product.mysql_id || "")
+                                )}
+
+                            </div>
+                        `;
+
+                    }
+                );
+
+
+                productsHtml += `
+                    </div>
+                `;
+
+
+                resultBox.innerHTML +=
+                    productsHtml;
+            }
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            resultBox.innerHTML += `
+                <div class="message error">
+
+                    <strong>Error:</strong>
+
+                    ${escapeHtml(error.message)}
+
+                </div>
+            `;
+
+        } finally {
+
+            button.disabled = false;
+
+            button.innerText =
+                "Ask Mind Heal";
+
+        }
+
+
+        // Scroll to latest result
+
+        resultBox.lastElementChild
+            ?.scrollIntoView({
+                behavior: "smooth"
+            });
+
+    }
+
+
+    // ==========================================
+    // Prevent HTML injection
+    // ==========================================
+
+    function escapeHtml(value) {
+
+        const div =
+            document.createElement("div");
+
+        div.textContent =
+            value ?? "";
+
+        return div.innerHTML;
+    }
+
+
+    // ==========================================
+    // Ctrl + Enter
+    // ==========================================
+
+    document
+        .getElementById("question")
+        .addEventListener(
+            "keydown",
+            function(event) {
+
+                if (
+                    event.ctrlKey &&
+                    event.key === "Enter"
+                ) {
+
+                    askMindHeal();
+
+                }
+
+            }
+        );
+
+</script>
+
+</body>
+</html>
