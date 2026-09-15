@@ -5,3 +5,7 @@ node_modules/
 chromadb-ui/ 
 
 .env
+
+chroma-data-backup/
+
+.venv/

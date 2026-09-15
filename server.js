@@ -124,22 +124,15 @@ app.post("/api/mind-heal/chat", async (req, res) => {
   }
 
   catch (error) {
-
-    console.error(
-      "\n===== API ERROR ====="
-    );
-
-    console.error(error);
-
+    console.error("\n===== API ERROR =====");
+    console.error("MESSAGE:", error.message);
+    console.error("STACK:", error.stack);
 
     return res.status(500).json({
-
       success: false,
-
-      message: "Something went wrong"
-
+      message: error.message,
+      stack: error.stack
     });
-
   }
 
 });

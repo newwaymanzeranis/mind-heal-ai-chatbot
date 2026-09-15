@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const { ChromaClient } = require("chromadb");
+const { CloudClient } = require("chromadb");
 const { DefaultEmbeddingFunction } = require("@chroma-core/default-embed");
 
 const { expandQuery } = require("./rag/query-expansion");
@@ -14,11 +14,13 @@ async function searchProduct(query) {
   // CHROMA
   // ==========================================
 
-  const chroma = new ChromaClient({
-    path: "http://localhost:8000"
+  const chroma = new CloudClient({
+    apiKey: process.env.CHROMA_API_KEY,
+  tenant: process.env.CHROMA_TENANT,
+  database: process.env.CHROMA_DATABASE,
   });
 
-  const collection = await chroma.getCollection({
+  const collection = await chroma.getOrCreateCollection({
     name: "mind_heal_products",
     embeddingFunction: new DefaultEmbeddingFunction(),
   });

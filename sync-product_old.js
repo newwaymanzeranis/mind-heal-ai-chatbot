@@ -1,6 +1,6 @@
-require("dotenv").config();
+ 
 const mysql = require("mysql2/promise");
-const { CloudClient } = require("chromadb");
+const { ChromaClient } = require("chromadb");
 const { DefaultEmbeddingFunction } = require("@chroma-core/default-embed");
 
 async function main() {
@@ -12,26 +12,20 @@ async function main() {
     database: "mind_heal",
   });
 
-  // ============================================
-  // Chroma Cloud connection
-  // ============================================
-  const chroma = new CloudClient({
-    apiKey: process.env.CHROMA_API_KEY,
-  tenant: process.env.CHROMA_TENANT,
-  database: process.env.CHROMA_DATABASE,
+  // ChromaDB connection
+  const chroma = new ChromaClient({
+    host: "localhost",
+    port: 8000,
+    ssl: false,
   });
 
-  // ============================================
   // Collection
-  // ============================================
   const collection = await chroma.getOrCreateCollection({
     name: "mind_heal_products",
     embeddingFunction: new DefaultEmbeddingFunction(),
   });
 
-  // ============================================
   // Product fetch
-  // ============================================
   const [products] = await db.execute(`
     SELECT
       id,
@@ -52,16 +46,12 @@ async function main() {
 
   console.log(`MySQL products found: ${products.length}`);
 
-  // ============================================
-  // Sync products to Chroma Cloud
-  // ============================================
   for (const product of products) {
 
     const document = `
 Product: ${product.name}
 
-Hindi Name:
-${product.name_hi}
+Hindi Name: ${product.name_hi}
 
 Short Description:
 ${product.short_description}
@@ -69,8 +59,16 @@ ${product.short_description}
 Hindi Short Description:
 ${product.short_description_hi}
 
+
 Emotional Tags:
 ${product.emotional_tags}
+
+Short Description:
+${product.short_description} 
+
+Hindi Short Description:
+${product.short_description_hi} 
+ 
 
 Hindi Emotional Tags:
 ${product.emotional_tags_hi}
@@ -79,7 +77,7 @@ Search Keywords:
 ${product.name}
 ${product.name_hi}
 ${product.emotional_tags || ""}
-
+      
 `.trim();
 
     await collection.upsert({
@@ -110,7 +108,7 @@ ${product.emotional_tags || ""}
 
   await db.end();
 
-  console.log("MySQL → Chroma Cloud sync completed.");
+  console.log("MySQL → ChromaDB sync completed.");
 }
 
 main().catch((error) => {
