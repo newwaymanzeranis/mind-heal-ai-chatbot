@@ -13,6 +13,7 @@ async function searchProduct(query) {
   // ==========================================
   // CHROMA
   // ==========================================
+  console.log("🔥 CHROMA CLOUD VERSION 2026");
 
   const chroma = new CloudClient({
     apiKey: process.env.CHROMA_API_KEY,
@@ -20,11 +21,13 @@ async function searchProduct(query) {
   database: process.env.CHROMA_DATABASE,
   });
 
+console.log("🔥 USING CHROMA CLOUD");
+
   const collection = await chroma.getOrCreateCollection({
     name: "mind_heal_products",
     embeddingFunction: new DefaultEmbeddingFunction(),
   }); 
-  
+
 
 
   // ==========================================
