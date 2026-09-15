@@ -1,5 +1,9 @@
 require("dotenv").config();
 
+const { env } = require("@huggingface/transformers");
+
+env.cacheDir = "/tmp/transformers-cache";
+
 const { CloudClient } = require("chromadb");
 const { DefaultEmbeddingFunction } = require("@chroma-core/default-embed");
 
