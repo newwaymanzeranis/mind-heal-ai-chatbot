@@ -23,7 +23,8 @@ async function searchProduct(query) {
   const collection = await chroma.getOrCreateCollection({
     name: "mind_heal_products",
     embeddingFunction: new DefaultEmbeddingFunction(),
-  });
+  }); 
+  
 
 
   // ==========================================
