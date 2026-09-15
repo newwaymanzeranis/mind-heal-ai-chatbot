@@ -151,7 +151,7 @@ app.post("/api/mind-heal/chat", async (req, res) => {
 // START SERVER
 // ==========================================
 
-app.listen(PORT, () => {
+/*app.listen(PORT, () => {
 
     console.log("\n========================================");
 
@@ -174,6 +174,44 @@ app.listen(PORT, () => {
     console.log("========================================\n");
 
 });
+*/
+
+
+// ==========================================
+// START SERVER
+// ==========================================
+
+if (require.main === module) {
+
+    const PORT = process.env.PORT || 3000;
+
+    app.listen(PORT, () => {
+
+        console.log("\n========================================");
+
+        console.log(
+            `Mind Heal API running at http://localhost:${PORT}`
+        );
+
+        console.log(
+            `Test page: http://localhost:${PORT}/test`
+        );
+
+        console.log(
+            `Health: http://localhost:${PORT}/api/health`
+        );
+
+        console.log(
+            `Chat API: POST http://localhost:${PORT}/api/mind-heal/chat`
+        );
+
+        console.log("========================================\n");
+
+    });
+
+}
+
+module.exports = app;
 
 
  
